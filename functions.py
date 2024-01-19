@@ -17,7 +17,7 @@ def get_action_verbs(doc: spacy.tokens.doc.Doc) -> list[spacy.tokens.token.Token
         verbs: list[Token]
             list of the verb tokens found (in spaCy format)
 
-        """
+    """
     verbs = []
     for token in doc:
         if token.pos_ in ('VERB', 'AUX'):
@@ -37,21 +37,19 @@ def get_action_verbs(doc: spacy.tokens.doc.Doc) -> list[spacy.tokens.token.Token
 def get_verb_objects(doc: spacy.tokens.doc.Doc,
                      verb: spacy.tokens.token.Token) -> list[str]:
     """
-    For sentence processed with spacy and verb processed with spacy finds direct objects
-    and prepositional phrases of the verb
+        For sentence processed with spacy and verb processed with spacy finds direct objects
+        and prepositional phrases of the verb
 
-    Input
-    -----
-    doc : Doc
-        sentence processed with spacy
-    verb: Doc
-        verb processed with spacy
-    ...
-
-    Output
-    ------
-    obj_text/pobj_text: list
-        a list of strings (objects of the verb) with left children
+        Input
+        -----
+        doc : Doc
+            sentence processed with spacy
+        verb: Doc
+            verb processed with spacy
+        Output
+        ------
+        obj_text/pobj_text: list
+            a list of strings (objects of the verb) with left children
     """
     if 'dobj' in list(map(lambda x: x.dep_, verb.rights)):
         obj = [tok for tok in verb.rights if tok.dep_ == 'dobj'][0]
@@ -103,16 +101,16 @@ def get_verb_objects(doc: spacy.tokens.doc.Doc,
 
 def get_noun_phrases(doc: spacy.tokens.doc.Doc) -> list[str]:
     """
-    For sentence processed with spacy finds noun phrases (noun and its children)
+        For sentence processed with spacy finds noun phrases (noun and its children)
 
-    Input
-    -----
-    doc : Doc
-        sentence processed with spacy
-    Output
-    ------
-    noun_phrases: list[str]
-        a list of strings of noun phrases
+        Input
+        -----
+        doc : Doc
+            sentence processed with spacy
+        Output
+        ------
+        noun_phrases: list[str]
+            a list of strings of noun phrases
     """
     noun_phrases = []
     for token in doc:
@@ -137,41 +135,37 @@ def get_noun_phrases(doc: spacy.tokens.doc.Doc) -> list[str]:
 
 def get_phrases_from_text(docs: list[spacy.tokens.doc.Doc]) -> tuple[list[str]]:
     """
-    For a list of sentences processed with spacy, makes verb phrases of verb + its object
-    and collects all the verb phrases and noun phrases
-    Input
-    -----
-    doc : Doc
-        sentence processed with spacy
-    Output
-    ------
-    noun_phrases: list[str]
-        a list of strings of noun phrases
-    verb_phrases: list[str]
-        a list of strings of verb phrases
+        For a list of sentences processed with spacy, makes verb phrases of verb + its object
+        and collects all the verb phrases and noun phrases
+
+        Input
+        -----
+        doc : Doc
+            sentence processed with spacy
+        Output
+        ------
+        noun_phrases: list[str]
+            a list of strings of noun phrases
+        verb_phrases: list[str]
+            a list of strings of verb phrases
     """
     verb_phrases_from_text = []
     noun_phrases_from_text = []
     for doc in docs:
-        print(doc)
         verbs = get_action_verbs(doc)
         for verb in verbs:
             if get_verb_objects(doc, verb):
                 phrase = verb.lemma_ + ' ' + get_verb_objects(doc, verb)[0]
-                print(phrase)
                 verb_phrases_from_text.append(phrase)
         noun_phrases = get_noun_phrases(doc)
         if noun_phrases:
             noun_phrases_from_text.extend(noun_phrases)
-            for phrase in noun_phrases:
-                print(phrase)
-        print('============================================================')
     return verb_phrases_from_text, noun_phrases_from_text
 
 
 def mean_pooling(model_output, attention_mask):
     """
-    Obtains word embeddings from the model and averages them to get a sentence embedding
+        Obtains word embeddings from the model and averages them to get a sentence embedding
     """
     token_embeddings = model_output['last_hidden_state']
     input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
