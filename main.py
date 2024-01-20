@@ -66,13 +66,15 @@ noun_cosine_scores = util.cos_sim(noun_phrases_from_text_embeddings,
 
 print('The use of sentence-transformers model to get sentence embeddings', end='\n\n')
 
-for i, phrase in enumerate(verb_phrases_from_text):
+# FOR EACH PHRASE FORM THE INPUT TEXT GET THE CLOSEST EMBEDDING OUT OF ALL STANDARD PHRASE EMBEDDINGS ARRAY
+
+for i, phrase in enumerate(verb_phrases_from_text):  # verb phrases
     j = np.argmax(verb_cosine_scores[i])
     if verb_cosine_scores[i][j] > 0.5:
         print("{:50s} {:30s} Score: {:.4f}".format(phrase, verb_standard_phrases[j],
                                                    verb_cosine_scores[i][j]))
 
-for i, phrase in enumerate(noun_phrases_from_text):
+for i, phrase in enumerate(noun_phrases_from_text):  # noun phrases
     j = np.argmax(noun_cosine_scores[i])
     if noun_cosine_scores[i][j] > 0.5:
         print("{:50s} {:50s} Score: {:.4f}".format(phrase, noun_standard_phrases[j],
@@ -122,6 +124,8 @@ verb_cosine_scores = cosine_similarity(verb_phrases_from_text_emb, verb_standard
 noun_cosine_scores = cosine_similarity(noun_phrases_from_text_emb, noun_standard_phrases_emb)
 
 print('The use of averaged word embeddings to get sentence embeddings', end='\n\n')
+
+# FOR EACH PHRASE FORM THE INPUT TEXT GET THE CLOSEST EMBEDDING OUT OF ALL STANDARD PHRASE EMBEDDINGS ARRAY
 
 for i, phrase in enumerate(verb_phrases_from_text):
     j = np.argmax(verb_cosine_scores[i])
