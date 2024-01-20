@@ -1,4 +1,4 @@
-from functions import *
+from PhraseExtractor import PhraseExtractor, mean_pooling
 
 import numpy as np
 import re
@@ -12,6 +12,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 nltk.download('punkt')
 nlp = spacy.load("en_core_web_lg")
 
+# READ INPUT TEXT
+
 filename = ''
 while not filename:
     filename = input('Enter the path to the file with the text you wish to improve: ')
@@ -20,13 +22,19 @@ with open(file=filename, mode='r') as f:
     lines = f.readlines()
 input_text = ' '.join([line.strip() for line in lines if not re.match(r'\s+', line)])
 
+# READ STANDARD PHRASES
+
 filename_phrases = '/content/business phrases.txt'
 with open(file=filename_phrases, mode='r') as f:
     lines = f.readlines()
 standard_phrases = list(set([phrase.strip().lower() for phrase in lines]))
 
+# PROCESS PHRASES AND SENTENCES WITH SPACY
+
 standard_phrases_docs = list(nlp.pipe(standard_phrases))
 input_docs = list(nlp.pipe(sent_tokenize(input_text)))
+
+# SORT OUT VERB AND NOUN STANDARD PHRASES
 
 verb_standard_phrases, noun_standard_phrases = [], []
 for doc in standard_phrases_docs:
@@ -36,10 +44,14 @@ for doc in standard_phrases_docs:
     else:
         noun_standard_phrases.append(doc.text)
 
-verb_phrases_from_text, noun_phrases_from_text = get_phrases_from_text(input_docs)
+# EXTRACT VERB AND NOUN PHRASES FORM TEXT
+
+phrase_extractor = PhraseExtractor(input_docs)
+verb_phrases_from_text, noun_phrases_from_text = phrase_extractor.get_phrases_from_text()
+
+# GET PHRASES EMBEDDINGS
 
 # The use of sentence transformers, distilroberta model
-
 model = SentenceTransformer('all-distilroberta-v1')
 
 verb_phrases_from_text_embeddings = model.encode(verb_phrases_from_text, convert_to_tensor=True)
@@ -47,20 +59,24 @@ noun_phrases_from_text_embeddings = model.encode(noun_phrases_from_text, convert
 verb_standard_phrases_embeddings = model.encode(verb_standard_phrases, convert_to_tensor=True)
 noun_standard_phrases_embeddings = model.encode(noun_standard_phrases, convert_to_tensor=True)
 
-verb_cosine_scores = util.cos_sim(verb_phrases_from_text_embeddings, verb_standard_phrases_embeddings).numpy()
-noun_cosine_scores = util.cos_sim(noun_phrases_from_text_embeddings, noun_standard_phrases_embeddings).numpy()
+verb_cosine_scores = util.cos_sim(verb_phrases_from_text_embeddings,
+                                  verb_standard_phrases_embeddings).numpy()
+noun_cosine_scores = util.cos_sim(noun_phrases_from_text_embeddings,
+                                  noun_standard_phrases_embeddings).numpy()
 
 print('The use of sentence-transformers model to get sentence embeddings', end='\n\n')
 
 for i, phrase in enumerate(verb_phrases_from_text):
     j = np.argmax(verb_cosine_scores[i])
     if verb_cosine_scores[i][j] > 0.5:
-        print("{:50s} {:30s} Score: {:.4f}".format(phrase, verb_standard_phrases[j], verb_cosine_scores[i][j]))
+        print("{:50s} {:30s} Score: {:.4f}".format(phrase, verb_standard_phrases[j],
+                                                   verb_cosine_scores[i][j]))
 
 for i, phrase in enumerate(noun_phrases_from_text):
     j = np.argmax(noun_cosine_scores[i])
     if noun_cosine_scores[i][j] > 0.5:
-        print("{:50s} {:50s} Score: {:.4f}".format(phrase, noun_standard_phrases[j], noun_cosine_scores[i][j]))
+        print("{:50s} {:50s} Score: {:.4f}".format(phrase, noun_standard_phrases[j],
+                                                   noun_cosine_scores[i][j]))
 
 # The use of  regular transformers, roberta model
 
@@ -108,9 +124,11 @@ print('The use of averaged word embeddings to get sentence embeddings', end='\n\
 for i, phrase in enumerate(verb_phrases_from_text):
     j = np.argmax(verb_cosine_scores[i])
     if verb_cosine_scores[i][j] > 0.5:
-        print("{:50s} {:30s} Score: {:.4f}".format(phrase, verb_standard_phrases[j], verb_cosine_scores[i][j]))
+        print("{:50s} {:30s} Score: {:.4f}".format(phrase, verb_standard_phrases[j],
+                                                   verb_cosine_scores[i][j]))
 
 for i, phrase in enumerate(noun_phrases_from_text):
     j = np.argmax(noun_cosine_scores[i])
     if noun_cosine_scores[i][j] > 0.5:
-        print("{:50s} {:50s} Score: {:.4f}".format(phrase, noun_standard_phrases[j], noun_cosine_scores[i][j]))
+        print("{:50s} {:50s} Score: {:.4f}".format(phrase, noun_standard_phrases[j],
+                                                   noun_cosine_scores[i][j]))
