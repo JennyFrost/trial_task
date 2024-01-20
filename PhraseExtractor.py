@@ -106,7 +106,7 @@ class PhraseExtractor:
                         if [tok for tok in prep2.rights if tok.dep_ == 'pobj']:
                             pobj2 = [tok for tok in prep2.rights if tok.dep_ == 'pobj'][0]
                             pobj_lefts2 = [tok.text for tok in pobj2.subtree if tok.i <= pobj2.i or tok.pos_ == 'ADP']
-                            if pobj_lefts2:
+                            if len(pobj_lefts2) > 1:
                                 for i, pobj in enumerate(pobjs):
                                     pobj_text[i] += ' ' + prep2.text + ' ' + ' '.join(pobj_lefts2)
                 return pobj_text
