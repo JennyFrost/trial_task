@@ -38,11 +38,11 @@ class PhraseExtractor:
                                             and not re.search(r'ed\b', token.head.text))))):
                         continue
                 verbs.append(token)
-            elif token.pos_ == 'ADJ' and bool(re.search(r'ed\b|ing\b', token.text)) \
-                    and token.head.dep_ in ('ROOT', 'nsubj') \
-                    and not ((doc[token.i - 1].text == ',' and
-                              doc[token.i - 2].pos_ == 'ADJ') or
-                              doc[token.i - 1].pos_ == 'ADJ'):
+            elif token.pos_ == 'ADJ' and bool(re.search(r'ed\b|ing\b', token.text)) \  # considering the cases when the parser mistakes a verb                                                                           # for
+                    and token.head.dep_ in ('ROOT', 'nsubj') \  # for an adjective and the direct verb objected for a noun, like in 'maximized revenue'
+                    and not ((doc[token.i-1].text == ',' and  # the parser treats 'maximized' as an adjective and 'revenue' as its parent, while
+                              doc[token.i-2].pos_ == 'ADJ') or  # 'maximize' is a verb and the root and 'revenue' is its direct object
+                              doc[token.i-1].pos_ == 'ADJ'):
                 verbs.append(token)
         return verbs
 
@@ -69,7 +69,7 @@ class PhraseExtractor:
             rights = list(chain([x for x in verb.rights if x.i > obj.i], list(obj.rights)))
             objs = [obj]
             obj_text = [' '.join([x.text for x in verb.rights if x.i < obj.i])]
-            if obj.conjuncts:
+            if obj.conjuncts:  # consider the case when there are several objects
                 conjs = [doc[conj.i:conj.i+1] for conj in obj.conjuncts]
                 rights += list(chain.from_iterable([list(conj[-1].rights) for conj in conjs]))
                 objs += conjs
@@ -94,7 +94,7 @@ class PhraseExtractor:
                 pobj = [word for word in prep.rights if word.dep_ == 'pobj'][0]
                 pobjs = [pobj]
                 pobj_text = [' '.join([x.text for x in verb.rights if x.i < pobj.i])]
-                if pobj.conjuncts:
+                if pobj.conjuncts:  # consider the case when there are several objects
                     pobjs += list(pobj.conjuncts)
                     pobj_text.append(' '.join([conj.text for conj in pobj.conjuncts]))
                 for i, obj in enumerate(pobjs):
