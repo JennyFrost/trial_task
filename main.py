@@ -49,7 +49,7 @@ for doc in standard_phrases_docs:
 phrase_extractor = PhraseExtractor(input_docs)
 verb_phrases_from_text, noun_phrases_from_text = phrase_extractor.get_phrases_from_text()
 
-# GET PHRASES EMBEDDINGS
+# GET PHRASE EMBEDDINGS
 
 # The use of sentence transformers, distilroberta model
 model = SentenceTransformer('all-distilroberta-v1')
@@ -106,15 +106,17 @@ with torch.no_grad():
                                                mean_pooling(outputs, inputs['attention_mask'])])
     verb_standard_phrases_emb = verb_standard_phrases_emb.cpu().numpy()
     for np in noun_phrases_from_text:
-        inputs = tokenizer(vp, return_tensors="pt")
+        inputs = tokenizer(np, return_tensors="pt")
         outputs = model(**inputs)
         noun_phrases_from_text_emb = torch.cat([noun_phrases_from_text_emb,
                                                 mean_pooling(outputs, inputs['attention_mask'])])
+    noun_phrases_from_text_emb = noun_phrases_from_text_emb.cpu().numpy()
     for np in noun_standard_phrases:
-        inputs = tokenizer(vp, return_tensors="pt")
+        inputs = tokenizer(np, return_tensors="pt")
         outputs = model(**inputs)
         noun_standard_phrases_emb = torch.cat([noun_standard_phrases_emb,
                                                mean_pooling(outputs, inputs['attention_mask'])])
+    noun_standard_phrases_emb = noun_standard_phrases_emb.cpu().numpy()
 
 verb_cosine_scores = cosine_similarity(verb_phrases_from_text_emb, verb_standard_phrases_emb)
 noun_cosine_scores = cosine_similarity(noun_phrases_from_text_emb, noun_standard_phrases_emb)
