@@ -38,11 +38,11 @@ class PhraseExtractor:
                                             and not re.search(r'ed\b', token.head.text))))):
                         continue
                 verbs.append(token)
-            elif token.pos_ == 'ADJ' and bool(re.search(r'ed\b|ing\b', token.text)) \  # considering the cases when the parser mistakes a verb                                                                           # for
-                    and token.head.dep_ in ('ROOT', 'nsubj') \  # for an adjective and the direct verb objected for a noun, like in 'maximized revenue'
+            elif (token.pos_ == 'ADJ' and bool(re.search(r'ed\b|ing\b', token.text))  # considering the cases when the parser mistakes a verb                                                                           # for
+                    and token.head.dep_ in ('ROOT', 'nsubj')   # for an adjective and the direct verb objected for a noun, like in 'maximized revenue'
                     and not ((doc[token.i-1].text == ',' and  # the parser treats 'maximized' as an adjective and 'revenue' as its parent, while
                               doc[token.i-2].pos_ == 'ADJ') or  # 'maximize' is a verb and the root and 'revenue' is its direct object
-                              doc[token.i-1].pos_ == 'ADJ'):
+                              doc[token.i-1].pos_ == 'ADJ')):
                 verbs.append(token)
         return verbs
 
@@ -85,8 +85,9 @@ class PhraseExtractor:
                 if [tok for tok in prep.rights if tok.dep_ == 'pobj']:
                     pobj = [tok for tok in prep.rights if tok.dep_ == 'pobj'][0]
                     pobj_lefts = [tok.text for tok in pobj.subtree if tok.i <= pobj.i or tok.pos_ == 'ADP']
-                    for i, obj in enumerate(objs):
-                        obj_text[i] += ' ' + ' '.join(pobj_lefts)
+                    if len(pobj_lefts) > 1:
+                        for i, obj in enumerate(objs):
+                            obj_text[i] += ' ' + ' '.join(pobj_lefts)
             return obj_text
         if any(list(map(lambda word: word.pos_ == 'ADP', verb.rights))):
             prep = [word for word in verb.rights if word.pos_ == 'ADP'][0]

@@ -52,12 +52,12 @@ verb_phrases_from_text, noun_phrases_from_text = phrase_extractor.get_phrases_fr
 # GET PHRASE EMBEDDINGS
 
 # The use of sentence transformers, distilroberta model
-model = SentenceTransformer('all-distilroberta-v1')
+model1 = SentenceTransformer('all-distilroberta-v1')
 
-verb_phrases_from_text_embeddings = model.encode(verb_phrases_from_text, convert_to_tensor=True)
-noun_phrases_from_text_embeddings = model.encode(noun_phrases_from_text, convert_to_tensor=True)
-verb_standard_phrases_embeddings = model.encode(verb_standard_phrases, convert_to_tensor=True)
-noun_standard_phrases_embeddings = model.encode(noun_standard_phrases, convert_to_tensor=True)
+verb_phrases_from_text_embeddings = model1.encode(verb_phrases_from_text, convert_to_tensor=True)
+noun_phrases_from_text_embeddings = model1.encode(noun_phrases_from_text, convert_to_tensor=True)
+verb_standard_phrases_embeddings = model1.encode(verb_standard_phrases, convert_to_tensor=True)
+noun_standard_phrases_embeddings = model1.encode(noun_standard_phrases, convert_to_tensor=True)
 
 verb_cosine_scores = util.cos_sim(verb_phrases_from_text_embeddings,
                                   verb_standard_phrases_embeddings).numpy()
@@ -83,11 +83,11 @@ for i, phrase in enumerate(noun_phrases_from_text):  # noun phrases
 # The use of  regular transformers, roberta model
 
 tokenizer = AutoTokenizer.from_pretrained("roberta-base")
-model = RobertaModel.from_pretrained("roberta-base")
+model2 = RobertaModel.from_pretrained("roberta-base")
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-model.to(device)
-model.eval()
+model2.to(device)
+model2.eval()
 
 verb_phrases_from_text_emb = torch.Tensor().to(device)
 verb_standard_phrases_emb = torch.Tensor().to(device)
@@ -97,25 +97,25 @@ noun_standard_phrases_emb = torch.Tensor().to(device)
 with torch.no_grad():
     for vp in verb_phrases_from_text:
         inputs = tokenizer(vp, return_tensors="pt")
-        outputs = model(**inputs)
+        outputs = model2(**inputs)
         verb_phrases_from_text_emb = torch.cat([verb_phrases_from_text_emb,
                                                 mean_pooling(outputs, inputs['attention_mask'])])
     verb_phrases_from_text_emb = verb_phrases_from_text_emb.cpu().numpy()
     for vp in verb_standard_phrases:
         inputs = tokenizer(vp, return_tensors="pt")
-        outputs = model(**inputs)
+        outputs = model2(**inputs)
         verb_standard_phrases_emb = torch.cat([verb_standard_phrases_emb,
                                                mean_pooling(outputs, inputs['attention_mask'])])
     verb_standard_phrases_emb = verb_standard_phrases_emb.cpu().numpy()
     for np in noun_phrases_from_text:
         inputs = tokenizer(np, return_tensors="pt")
-        outputs = model(**inputs)
+        outputs = model2(**inputs)
         noun_phrases_from_text_emb = torch.cat([noun_phrases_from_text_emb,
                                                 mean_pooling(outputs, inputs['attention_mask'])])
     noun_phrases_from_text_emb = noun_phrases_from_text_emb.cpu().numpy()
     for np in noun_standard_phrases:
         inputs = tokenizer(np, return_tensors="pt")
-        outputs = model(**inputs)
+        outputs = model2(**inputs)
         noun_standard_phrases_emb = torch.cat([noun_standard_phrases_emb,
                                                mean_pooling(outputs, inputs['attention_mask'])])
     noun_standard_phrases_emb = noun_standard_phrases_emb.cpu().numpy()
